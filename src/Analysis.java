@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class Naive extends Solution {
@@ -202,7 +203,67 @@ class BoyerMoore extends Solution {
     @Override
     public String Solve(String text, String pattern) {
         // TODO: Students should implement Boyer-Moore algorithm here
-        throw new UnsupportedOperationException("Boyer-Moore algorithm not yet implemented - this is your homework!");
+
+        List<Integer> indices = new ArrayList<>();
+        int n = text.length();
+        int m = pattern.length();
+
+        if(m == 0){
+            for(int i = 0 ; i <= n ; i++){
+                indices.add(i);
+            }
+            return indicesToString(indices);
+        }
+
+
+        if(m > n){
+            return "";
+        }
+
+        int[] last = buildLastOccurrence(pattern);
+
+        int s = 0;
+
+        while(s <= n - m){
+            int j = m - 1;
+
+            while(j >= 0 && pattern.charAt(j) == text.charAt(s+j)){
+                j--;
+            }
+
+            if(j < 0){
+                indices.add(s);
+
+                if(s + m < n){
+                    char nextChar = text.charAt(s + m);
+                    int lastPos = last[nextChar & 0xFF];
+
+                    s += m - lastPos;
+                }
+                else{
+                    s += 1;
+                }
+            }
+            else{
+                char badChar = text.charAt(s + j);
+                int lastPos = last[badChar & 0xFF];
+                int shift = Math.max(1, j - lastPos);
+                s += shift;
+            }
+        }
+
+        return indicesToString(indices); 
+    }
+
+    private int[] buildLastOccurrence(String pattern){
+        int[] last = new int[256];
+        Arrays.fill(last, -1);
+
+        for(int i = 0; i < pattern.length(); i++){
+            char c = pattern.charAt(i);
+            last[c & 0xFF] = i;
+        }
+        return last;
     }
 }
 
